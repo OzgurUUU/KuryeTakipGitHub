@@ -1,0 +1,93 @@
+<aside
+  class="w-80 h-screen bg-gray-800 border-r border-gray-700 shadow-2xl flex flex-col z-10 shrink-0">
+
+  <div class="p-5 bg-gray-900 border-b border-gray-700 shrink-0">
+    <h1
+      class="text-xl font-bold tracking-wider text-blue-400 flex items-center gap-2">
+      <span>📦</span> Lojistik Takip
+    </h1>
+    <p class="text-gray-400 text-xs mt-1">Canlı Saha Operasyonu</p>
+  </div>
+
+  <div
+    class="p-5 flex-1 min-h-0 overflow-y-auto flex flex-col gap-6 custom-scrollbar">
+
+    <div
+      class="p-3 bg-gray-900 border border-dashed border-blue-500 rounded-lg flex items-center justify-between shrink-0 hover:bg-gray-800 transition-colors mb-4">
+      <div>
+        <p
+          class="text-xs text-gray-300 uppercase tracking-wider font-bold mb-1">Yeni
+          Kurye</p>
+        <p class="text-[10px] text-blue-400/80 italic">Haritaya sürükle 👉</p>
+      </div>
+      <div draggable="true" (dragstart)="onDragStart($event, 'courier')"
+        class="w-10 h-10 bg-blue-500/20 border-2 border-blue-500 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110 transition-transform shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+        <span class="text-lg">📍</span>
+      </div>
+    </div>
+
+    <div
+      class="p-3 bg-gray-900 border border-dashed border-orange-500 rounded-lg flex items-center justify-between shrink-0 hover:bg-gray-800 transition-colors mb-6">
+      <div>
+        <p
+          class="text-xs text-gray-300 uppercase tracking-wider font-bold mb-1">Sipariş
+          Ver</p>
+        <p class="text-[10px] text-orange-400/80 italic">Haritaya sürükle 👉</p>
+      </div>
+      <div draggable="true" (dragstart)="onDragStart($event, 'order')"
+        class="w-10 h-10 bg-orange-500/20 border-2 border-orange-500 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110 transition-transform shadow-[0_0_10px_rgba(249,115,22,0.5)]">
+        <span class="text-lg">📦</span>
+      </div>
+    </div>
+
+    <div
+      class="bg-gray-700 rounded-xl p-4 border border-gray-600 shadow-inner shrink-0">
+      <h3 class="text-gray-400 text-xs font-semibold mb-1">Aktif Kurye
+        Sayısı</h3>
+      <p class="text-3xl font-black text-blue-400">{{ activeCouriersCount }}</p>
+    </div>
+
+    <div class="shrink-0">
+      <h3
+        class="text-gray-300 text-sm font-semibold mb-3 border-b border-gray-700 pb-2">Sahadaki
+        Kuryeler</h3>
+      <ul class="space-y-2 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+        <li *ngFor="let courier of couriersList"
+          (click)="triggerFocus(courier.id)"
+          class="flex items-center justify-between p-3 bg-gray-700 rounded-lg border border-gray-600 cursor-pointer hover:bg-gray-600 hover:border-blue-500 transition-all group shadow-sm">
+
+          <div class="flex items-center gap-3">
+            <div
+              class="w-8 h-8 rounded-full bg-gray-800 border border-gray-600 text-blue-400 flex items-center justify-center font-bold text-sm group-hover:bg-blue-500 group-hover:text-gray-900 group-hover:border-transparent transition-colors">
+              🛵
+            </div>
+            <span class="text-sm font-medium text-gray-200 truncate w-32" title="{{ courier.id }}">{{ courier.id }}</span>
+          </div>
+
+          <svg
+            class="w-5 h-5 text-gray-500 group-hover:text-blue-400 transition-colors"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex-1 flex flex-col min-h-0">
+      <h3
+        class="text-gray-300 text-sm font-semibold mb-3 border-b border-gray-700 pb-2">Son
+        Hareketler</h3>
+      <ul class="space-y-2 overflow-y-auto pr-1 custom-scrollbar">
+        <li *ngFor="let log of recentLogs"
+          class="text-xs bg-gray-700 text-gray-300 p-3 rounded-lg border-l-4 border-blue-500 shadow-sm animate-fade-in">
+          {{ log }}
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</aside>
