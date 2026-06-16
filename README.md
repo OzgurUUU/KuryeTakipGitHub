@@ -147,16 +147,6 @@ ng serve -o
 * ⚡ High-performance data streaming
 * 🧩 Microservices-ready design
 
----
-
-## 📸 (Optional) Screenshots
-
-> You can add UI screenshots here for better presentation.
-
-```
-<img width="1280" height="670" alt="Ekran görüntüsü 2026-06-16 141450" src="https://github.com/user-attachments/assets/c50a4352-936c-459e-886a-cde238063d4c" />
-
-```
 
 ---
 
