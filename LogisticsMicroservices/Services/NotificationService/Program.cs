@@ -26,12 +26,20 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<OrderDeliveredConsumer>();
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("localhost", "/", h =>
+        cfg.Host("localhost", "/", h => { h.Username("guest"); h.Password("guest"); });
+
+        cfg.ReceiveEndpoint("notification-driver-assigned", e =>
         {
-            h.Username("guest");
-            h.Password("guest");
+            e.ConfigureConsumer<DriverAssignedConsumer>(context);
         });
-        cfg.ConfigureEndpoints(context);
+        cfg.ReceiveEndpoint("notification-location-updated", e =>
+        {
+            e.ConfigureConsumer<LocationUpdatedConsumer>(context);
+        });
+        cfg.ReceiveEndpoint("notification-order-delivered", e =>
+        {
+            e.ConfigureConsumer<OrderDeliveredConsumer>(context);
+        });
     });
 });
 

@@ -47,16 +47,18 @@ public class Worker : BackgroundService
                     // Hedefe çok yaklaştıysa (yaklaşık 10-20 metre) teslimatı yap
                     if (distance < 0.0009)
                     {
+                        Guid? deliveredOrderId;
+
                         lock (courier.Lock)
                         {
                             _logger.LogInformation($"✅ {courier.CourierId}, siparişi hedefe teslim etti!");
 
-                            var deliveredOrderId = courier.ActiveOrderId;
+                            deliveredOrderId = courier.ActiveOrderId;
 
                             if (courier.TaskQueue.Count > 0)
                             {
                                 var nextTask = courier.TaskQueue.Dequeue();
-                                _logger.LogWarning($"🔄 SIRA SANA GELDİ! {courier.CourierId} kuyruktaki yeni siparişe: #{nextTask.OrderId.ToString()[..8]}");
+                                _logger.LogWarning($"🔄 SIRA SANA GELDİ! {courier.CourierId} -> #{nextTask.OrderId.ToString()[..8]}");
                                 courier.TargetLatitude = nextTask.TargetLatitude;
                                 courier.TargetLongitude = nextTask.TargetLongitude;
                                 courier.ActiveOrderId = nextTask.OrderId;
@@ -67,11 +69,14 @@ public class Worker : BackgroundService
                                 courier.TargetLongitude = null;
                                 courier.ActiveOrderId = null;
                             }
+                        }
 
-                            // Publish lock dışında yapılacak (await kullanamayız lock içinde)
-                            _ = _bus.Publish(new OrderDeliveredEvent
+                        // Publish lock DIŞINDA — await kullanabiliyoruz, token düzgün işleniyor
+                        if (deliveredOrderId.HasValue)
+                        {
+                            await _bus.Publish(new OrderDeliveredEvent
                             {
-                                OrderId = deliveredOrderId!.Value,
+                                OrderId = deliveredOrderId.Value,
                                 DriverId = courier.CourierId,
                                 DeliveredAt = DateTime.UtcNow
                             }, stoppingToken);
@@ -92,7 +97,13 @@ public class Worker : BackgroundService
                 }
 
                 // Gateway üzerinden Tracking servisine konumu bildir
-                var payload = new { courierId = courier.CourierId, latitude = courier.Latitude, longitude = courier.Longitude };
+                var payload = new
+                {
+                    courierId = courier.CourierId,
+                    latitude = courier.Latitude,
+                    longitude = courier.Longitude,
+                    isAvailable = !courier.ActiveOrderId.HasValue  // boşsa true, meşgulse false
+                };
                 var json = JsonSerializer.Serialize(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 

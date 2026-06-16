@@ -6,4 +6,5 @@ public class CourierLocation
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public DateTime LastUpdated { get; set; }
+    public bool IsAvailable { get; set; } = true; // ← yeni alan
 }

@@ -1,12 +1,14 @@
 using MassTransit;
 using DriverTrackingService.Consumers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddMassTransit(x =>
 {
-    // Oluþturduðumuz Consumer sýnýfýný MassTransit'e tanýtýyoruz
     x.AddConsumer<OrderCreatedConsumer>();
+    x.AddConsumer<DriverAssignedConsumer>();   // ? yeni
+    x.AddConsumer<OrderDeliveredConsumer>();   // ? yeni
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -16,8 +18,18 @@ builder.Services.AddMassTransit(x =>
             h.Password("guest");
         });
 
-        // RabbitMQ üzerinde otomatik bir kuyruk (queue) oluþturur ve consumer'ý baðlar
-        cfg.ConfigureEndpoints(context);
+        cfg.ReceiveEndpoint("tracking-order-created", e =>
+        {
+            e.ConfigureConsumer<OrderCreatedConsumer>(context);
+        });
+        cfg.ReceiveEndpoint("tracking-driver-assigned", e =>
+        {
+            e.ConfigureConsumer<DriverAssignedConsumer>(context);
+        });
+        cfg.ReceiveEndpoint("tracking-order-delivered", e =>
+        {
+            e.ConfigureConsumer<OrderDeliveredConsumer>(context);
+        });
     });
 });
 
@@ -25,13 +37,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    // Þimdilik localhost, Docker'a geçince "redis:6379" olacak
     options.Configuration = "localhost:6379";
     options.InstanceName = "DriverTracking_";
 });
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

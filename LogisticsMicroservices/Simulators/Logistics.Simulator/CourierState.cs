@@ -33,8 +33,8 @@ namespace Logistics.Simulator
         public List<CourierSimModel> Couriers { get; } = new()
     {
         new CourierSimModel { CourierId = "kurye_ahmet", Latitude = 37.0020, Longitude = 35.3220 },
-        //new CourierSimModel { CourierId = "kurye_mehmet", Latitude = 37.0150, Longitude = 35.3330 },
-        //new CourierSimModel { CourierId = "kurye_ayse", Latitude = 36.9950, Longitude = 35.3110 }
+        new CourierSimModel { CourierId = "kurye_mehmet", Latitude = 37.0150, Longitude = 35.3330 },
+        new CourierSimModel { CourierId = "kurye_ayse", Latitude = 36.9950, Longitude = 35.3110 }
     };
         
     }

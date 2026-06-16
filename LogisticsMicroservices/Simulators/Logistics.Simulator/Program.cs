@@ -13,7 +13,11 @@ builder.Services.AddMassTransit(x =>
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host("localhost", "/", h => { h.Username("guest"); h.Password("guest"); });
-        cfg.ConfigureEndpoints(context);
+
+        cfg.ReceiveEndpoint("simulator-driver-assigned", e =>
+        {
+            e.ConfigureConsumer<DriverAssignedConsumer>(context);
+        });
     });
 });
 builder.Services.AddHostedService<Worker>();

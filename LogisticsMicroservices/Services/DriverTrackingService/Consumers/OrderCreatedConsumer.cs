@@ -24,20 +24,20 @@ public class OrderCreatedConsumer : IConsumer<OrderCreatedEvent>
     public async Task Consume(ConsumeContext<OrderCreatedEvent> context)
     {
         var order = context.Message;
-        _logger.LogInformation($"📬 [Kurye Servisi] Yeni sipariş için kurye aranıyor... Sipariş ID: {order.OrderId}");
+        _logger.LogInformation($"📬 Yeni sipariş için kurye aranıyor... Sipariş ID: {order.OrderId}");
 
         string closestCourierId = null;
         double shortestDistance = double.MaxValue;
 
-        // 1. Redis'teki tüm aktif kuryelerin konumlarını dönüyoruz
         foreach (var courierId in _activeCourierIds)
         {
             var cacheData = await _cache.GetStringAsync(courierId);
-            if (string.IsNullOrEmpty(cacheData)) continue; // Kurye aktif değilse geç
+            if (string.IsNullOrEmpty(cacheData)) continue;
 
             var courierLocation = JsonSerializer.Deserialize<CourierLocation>(cacheData);
 
-            // 2. Haversine ile sipariş noktası ile kurye arasındaki mesafeyi ölçüyoruz
+            // IsAvailable kontrolü kaldırıldı — meşgul olsa da en yakın kuryeye ata,
+            // Simulator kuyruğa alacak
             double distance = DistanceCalculator.CalculateWithHaversine(
                 order.DeliveryLatitude, order.DeliveryLongitude,
                 courierLocation.Latitude, courierLocation.Longitude
@@ -45,7 +45,6 @@ public class OrderCreatedConsumer : IConsumer<OrderCreatedEvent>
 
             _logger.LogInformation($"🔍 {courierId} mesafesi: {distance:F2} km");
 
-            // 3. En yakındaki kuryeyi güncelliyoruz
             if (distance < shortestDistance)
             {
                 shortestDistance = distance;
@@ -53,11 +52,9 @@ public class OrderCreatedConsumer : IConsumer<OrderCreatedEvent>
             }
         }
 
-        // 4. Sonucu ekrana basıyoruz ve atamayı gerçekleştiriyoruz
         if (closestCourierId != null)
         {
-            _logger.LogInformation($"🎯 ATAŞMA BAŞARILI! Sipariş {order.OrderId} için en yakın kurye: {closestCourierId} ({shortestDistance:F2} km uzakta) --- enlemi: {order.DeliveryLatitude}");
-            order.Status = "Assigned";
+            _logger.LogInformation($"🎯 Sipariş {order.OrderId} -> {closestCourierId} ({shortestDistance:F2} km)");
             await context.Publish<DriverAssignedEvent>(new DriverAssignedEvent
             {
                 OrderId = order.OrderId,
@@ -67,11 +64,10 @@ public class OrderCreatedConsumer : IConsumer<OrderCreatedEvent>
                 TargetLatitude = order.DeliveryLatitude,
                 TargetLongitude = order.DeliveryLongitude
             });
-            // TODO: Bir sonraki adımda burada RabbitMQ'ya "Kurye Atandı" (DriverAssignedEvent) fırlatacağız!
         }
         else
         {
-            _logger.LogWarning("❌ Siparişe atanacak aktif kurye bulunamadı!");
+            _logger.LogWarning("❌ Aktif kurye bulunamadı!");
         }
     }
 }

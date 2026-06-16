@@ -3,29 +3,25 @@ using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using NotificationService.Hubs;
 
-namespace NotificationService.Consumers
+namespace NotificationService.Consumers;
+
+public class LocationUpdatedConsumer : IConsumer<CourierLocationUpdatedEvent>
 {
-    public class LocationUpdatedConsumer : IConsumer<CourierLocationUpdatedEvent>
+    private readonly IHubContext<LogisticsHub> _hubContext;
+    private readonly ILogger<LocationUpdatedConsumer> _logger; // ← DriverAssignedConsumer'dan LocationUpdatedConsumer'a düzeltildi
+
+    public LocationUpdatedConsumer(IHubContext<LogisticsHub> hubContext, ILogger<LocationUpdatedConsumer> logger)
     {
-        private readonly IHubContext<LogisticsHub> _hubContext;
-        private readonly ILogger<DriverAssignedConsumer> _logger;
+        _hubContext = hubContext;
+        _logger = logger;
+    }
 
-        // SignalR IHubContext enjekte ederek WebSocket hatlarına erişiyoruz
-        public LocationUpdatedConsumer(IHubContext<LogisticsHub> hubContext, ILogger<DriverAssignedConsumer> logger)
-        {
-            _hubContext = hubContext;
-            _logger = logger;
-        }
+    public async Task Consume(ConsumeContext<CourierLocationUpdatedEvent> context)
+    {
+        var msg = context.Message;
 
-        public async Task Consume(ConsumeContext<CourierLocationUpdatedEvent> context)
-        {
-            var msg = context.Message;
+        _logger.LogDebug($"📍 Konum alındı: {msg.CourierId} -> {msg.Latitude}, {msg.Longitude}");
 
-            // Konsolda verinin aktığını görebilmek için minik bir log (Çok hızlı akacağı için istersen yoruma alabilirsin)
-            // _logger.LogInformation($"📍 Sinyal Alındı: Kurye {msg.CourierId} -> {msg.Latitude}, {msg.Longitude}");
-
-            // 🚀 BÜYÜLÜ AN: RabbitMQ'dan gelen anlık konumu, SignalR üzerinden Angular'daki 'ReceiveLocation' metoduna fırlatıyoruz!
-            await _hubContext.Clients.All.SendAsync("ReceiveLocation", msg.CourierId, msg.Latitude, msg.Longitude, "Motorcycle");
-        }
+        await _hubContext.Clients.All.SendAsync("ReceiveLocation", msg.CourierId, msg.Latitude, msg.Longitude);
     }
 }
