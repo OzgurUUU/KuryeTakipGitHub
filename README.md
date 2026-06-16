@@ -154,7 +154,7 @@ ng serve -o
 > You can add UI screenshots here for better presentation.
 
 ```
-<img width="1280" height="670" alt="image" src="https://github.com/user-attachments/assets/2dad50b7-ceab-475e-a7df-31c000b0a419" />
+<img width="1280" height="670" alt="Ekran görüntüsü 2026-06-16 141450" src="https://github.com/user-attachments/assets/c50a4352-936c-459e-886a-cde238063d4c" />
 
 ```
 
