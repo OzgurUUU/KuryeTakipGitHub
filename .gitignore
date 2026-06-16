@@ -1,0 +1,22 @@
+# Node.js / Angular
+node_modules/
+dist/
+.angular/
+npm-debug.log
+yarn-error.log
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.db
+*.db-shm
+*.db-wal
+TestResults/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db

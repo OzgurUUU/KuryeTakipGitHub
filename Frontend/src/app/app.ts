@@ -35,6 +35,13 @@ export class App implements OnInit {
   ngOnInit() {
     this.signalrService.startConnection();
 
+    // 0. Backend'den oto siparis geldiginde (Simulator):
+    this.signalrService.orderCreated.subscribe((payload: any) => {
+      this.mapComponent.addOrderMarker(payload.orderId, payload.latitude, payload.longitude);
+      this.recentLogs.unshift(`📱 [Oto Sipariş] ${payload.customerName} - ${payload.itemDescription}`);
+      if (this.recentLogs.length > 5) this.recentLogs.pop();
+    });
+
     // 1. Backend'den kurye konumu geldiğinde:
     this.signalrService.locationUpdates.subscribe((data: CourierLocation) => {
       this.mapComponent.updateMarker(data.id, data.lat, data.lon, data.vehicleType || 'Motorcycle');
@@ -46,14 +53,8 @@ export class App implements OnInit {
       this.recentLogs.unshift(`🎯 ATAMA: Sipariş #${payload.orderId.substring(0,8)} -> Kurye: ${payload.driverId} (${payload.distance.toFixed(2)} km)`);
       if (this.recentLogs.length > 5) this.recentLogs.pop();
       
-      // TODO: MapComponent güncellendiğinde burada sipariş ile kurye arasına çizgi çektirebiliriz!
-      this.signalrService.orderAssigned.subscribe((payload: OrderAssignedPayload) => {
-      this.recentLogs.unshift(`🎯 ATAMA: Sipariş #${payload.orderId.substring(0,8)} -> Kurye: ${payload.driverId} (${payload.distance.toFixed(2)} km)`);
-      if (this.recentLogs.length > 5) this.recentLogs.pop();
-      
       // 🚀 İŞTE BURASI: Haritada atama çizgisini çekiyoruz!
       this.mapComponent.drawLineBetweenOrderAndCourier(payload.orderId, payload.driverId);
-    });
     });
 
     // 3. Backend'den silinme emri geldiğinde:

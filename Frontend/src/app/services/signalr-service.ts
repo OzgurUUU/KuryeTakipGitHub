@@ -18,6 +18,15 @@ export interface OrderAssignedPayload {
   time: string; // C# tarafındaki DateTime, JSON ile string olarak gelir
 }
 
+export interface OrderCreatedPayload {
+  orderId: string;
+  customerName: string;
+  latitude: number;
+  longitude: number;
+  itemDescription: string;
+  createdAt: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,6 +39,9 @@ export class SignalrService {
   
   // Yeni: Atama bildirimlerini componentlere iletmek için
   public orderAssigned = new Subject<OrderAssignedPayload>(); 
+  
+  // Yeni: Oto siparis bildirimlerini componentlere iletmek
+  public orderCreated = new Subject<OrderCreatedPayload>();
 
   public startConnection() {
     this.hubConnection = new signalR.HubConnectionBuilder()
@@ -42,6 +54,12 @@ export class SignalrService {
       .start()
       .then(() => console.log('⚡ SignalR Gateway Üzerinden Başarıyla Bağlandı!'))
       .catch(err => console.error('❌ SignalR Bağlantı Hatası:', err));
+
+    // 0. Yeni Sipariş Dinleyicisi
+    this.hubConnection.on('OrderCreated', (payload: OrderCreatedPayload) => {
+      console.log('📦 [SignalR] Yeni Sipariş Geldi:', payload);
+      this.orderCreated.next(payload);
+    });
 
     // 1. Yeni Eklediğimiz "Sipariş Atandı" Dinleyicisi
     this.hubConnection.on('OrderAssigned', (payload: OrderAssignedPayload) => {
