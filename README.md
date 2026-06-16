@@ -154,7 +154,8 @@ ng serve -o
 > You can add UI screenshots here for better presentation.
 
 ```
-![Dashboard](./docs/dashboard.png)
+<img width="1280" height="670" alt="image" src="https://github.com/user-attachments/assets/2dad50b7-ceab-475e-a7df-31c000b0a419" />
+
 ```
 
 ---
